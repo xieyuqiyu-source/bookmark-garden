@@ -2,7 +2,7 @@
 
 把 Chrome 书签栏变成一张本地导航桌面。打开新标签页，直接浏览自己的书签；不用手动导入，不需要账号或服务器。
 
-[公开仓库](https://github.com/xieyuqiyu-source/bookmark-garden) · [Figma A 版设计](https://www.figma.com/design/acfysADpxG5pFDfadqOUSc?node-id=2-16)
+[下载最新版](https://github.com/xieyuqiyu-source/bookmark-garden/releases/latest) · [公开仓库](https://github.com/xieyuqiyu-source/bookmark-garden) · [Figma A 版设计](https://www.figma.com/design/acfysADpxG5pFDfadqOUSc?node-id=2-16)
 
 ![云屿桌面预览，使用公共示例书签](docs/preview.png)
 
@@ -23,6 +23,20 @@
 普通网页预览使用公共示例和本地品牌图标，底部标注“示例书签”。真实扩展始终使用自己的书签与 Chrome favicon，读取失败时不会冒充示例数据。
 
 ## 安装
+
+### 下载安装包（推荐）
+
+无需安装 Node.js 或运行开发服务器。
+
+1. 打开 [GitHub Releases 最新版](https://github.com/xieyuqiyu-source/bookmark-garden/releases/latest)，在 **Assets** 中下载 `qiye-版本号.zip`。不要选择 `Source code`，那是需要自行构建的源码。
+2. 将 ZIP 解压到固定目录，例如 `应用/栖页`。解压后的文件夹中应有 `manifest.json`、`index.html` 和 `assets`。
+3. 在 Chrome 地址栏输入 `chrome://extensions/`，开启右上角「开发者模式」。
+4. 点击「加载已解压的扩展程序」，选择包含 `manifest.json` 的文件夹。
+5. 打开新标签页；如果 Chrome 询问是否保留更改，选择保留。
+
+支持 Chrome 114+；目前已在 macOS Chrome 验证，Windows/Linux 尚未实机验证。加载后请保留安装文件夹，不要移动或删除。包内附有可离线打开的 `安装指南.html`。
+
+**更新 ZIP 安装版本**：关闭栖页标签页，将新 ZIP 的全部内容覆盖解压到原来的安装目录；在 `chrome://extensions/` 点击栖页的刷新按钮，再打开新标签页。不要先卸载扩展，保持原安装目录可保留扩展身份及本地偏好。
 
 ### 从源码安装
 
