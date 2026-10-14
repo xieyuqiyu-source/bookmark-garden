@@ -175,3 +175,10 @@ test("selected folders retain nested empty folders even with repeated titles", (
     ["a", "a-empty"],
   );
 });
+
+test("motion defaults to system and preserves explicit user choices", () => {
+  for (const motion of [undefined, null, "true", 1])
+    assert.equal(normalizePreferences({ motion }).motion, null);
+  assert.equal(normalizePreferences({ motion: true }).motion, true);
+  assert.equal(normalizePreferences({ motion: false }).motion, false);
+});

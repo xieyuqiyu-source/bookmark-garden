@@ -28,6 +28,7 @@ export interface Preferences {
   pins: string[];
   theme: "light" | "dark";
   compact: boolean;
+  motion: boolean | null;
   newTab: boolean;
   showTime: boolean;
   showWelcome: boolean;
@@ -41,6 +42,7 @@ export const defaults: Preferences = {
   pins: [],
   theme: "light",
   compact: false,
+  motion: null,
   newTab: true,
   showTime: true,
   showWelcome: true,
@@ -64,6 +66,7 @@ export function normalizePreferences(value: unknown): Preferences {
       : [],
     theme: data.theme === "dark" ? "dark" : "light",
     compact: data.compact === true,
+    motion: typeof data.motion === "boolean" ? data.motion : null,
     newTab: data.newTab !== false,
     showTime: data.showTime !== false,
     showWelcome: data.showWelcome !== false,

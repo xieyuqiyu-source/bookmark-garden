@@ -37,6 +37,10 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = prefs.theme;
   }, [prefs.theme]);
+  useEffect(() => {
+    document.documentElement.dataset.motion =
+      prefs.motion === null ? "system" : prefs.motion ? "on" : "off";
+  }, [prefs.motion]);
   const groups = useMemo(
     () =>
       groupBookmarks(

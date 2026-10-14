@@ -789,14 +789,6 @@ button:active {
     font-size: 10px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  * {
-    scroll-behavior: auto !important;
-    transition: none !important;
-    animation: none !important;
-  }
-}
-
 * {
   scrollbar-width: none;
 }
@@ -948,12 +940,23 @@ dialog[data-closing]::backdrop {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after,
-  dialog::backdrop {
+  html:not([data-motion="on"]),
+  html:not([data-motion="on"]) *,
+  html:not([data-motion="on"]) *::before,
+  html:not([data-motion="on"]) *::after,
+  html:not([data-motion="on"]) dialog::backdrop {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+html[data-motion="off"],
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after,
+html[data-motion="off"] dialog::backdrop {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
 }

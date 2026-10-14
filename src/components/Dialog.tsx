@@ -21,7 +21,7 @@ export function Dialog({
     if (!closing) return;
     const timer = window.setTimeout(
       onClose,
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 160,
+      getComputedStyle(ref.current!).animationName === "none" ? 0 : 160,
     );
     return () => window.clearTimeout(timer);
   }, [closing, onClose]);

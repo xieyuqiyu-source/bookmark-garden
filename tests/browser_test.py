@@ -25,6 +25,58 @@ def close(page):
 def no_overflow(page):
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Horizontal overflow"
 
+def test_motion(page):
+    # Reproduce this Mac's reduced-motion setting, then explicitly enable app motion.
+    page.emulate_media(reduced_motion="reduce")
+    panel = settings(page)
+    assert panel.evaluate("el => getComputedStyle(el).animationName") == "none"
+    toggle = panel.get_by_role("switch", name="过渡动画", exact=True)
+    expect(toggle).to_have_attribute("aria-checked", "false")
+    toggle.click()
+    expect(toggle).to_have_attribute("aria-checked", "true")
+    close(page)
+    page.reload()
+    expect(page.locator("html")).to_have_attribute("data-motion", "on")
+    # Sample rendered frames rather than merely checking a declared animation name.
+    frames = page.evaluate("""async () => {
+      document.querySelector('button[aria-label="设置"]').click();
+      const frames = [];
+      for (let i = 0; i < 24; i++) {
+        await new Promise(requestAnimationFrame);
+        const panel = document.querySelector('.settings-panel');
+        if (panel) {
+          const style = getComputedStyle(panel);
+          frames.push({opacity: Number(style.opacity), x: new DOMMatrix(style.transform).m41});
+        }
+      }
+      return frames;
+    }""")
+    assert any(0 < f["opacity"] < 0.95 and f["x"] > 1 for f in frames), frames
+    assert frames[-1]["opacity"] == 1 and frames[-1]["x"] == 0, frames
+    frames = page.evaluate("""async () => {
+      document.querySelector('button[aria-label="关闭设置"]').click();
+      const frames = [];
+      for (let i = 0; i < 24; i++) {
+        await new Promise(requestAnimationFrame);
+        const panel = document.querySelector('.settings-panel');
+        frames.push(panel ? Number(getComputedStyle(panel).opacity) : null);
+      }
+      return frames;
+    }""")
+    assert any(f is not None and 0 < f < 0.95 for f in frames), frames
+    assert frames[-1] is None, frames
+    panel = settings(page)
+    panel.get_by_role("switch", name="过渡动画", exact=True).click()
+    close(page)
+    page.emulate_media(reduced_motion="no-preference")
+    page.reload()
+    panel = settings(page)
+    assert panel.evaluate("el => getComputedStyle(el).animationName") == "none"
+    panel.get_by_role("button", name="恢复默认", exact=True).click()
+    close(page)
+    expect(page.locator("html")).to_have_attribute("data-motion", "system")
+    print("PASS motion: reduced-motion override, live entry/exit frames, disabled mode, reload persistence, reset")
+
 def test_preview(browser, url):
     context = browser.new_context(viewport={"width": 1586, "height": 992})
     page = context.new_page()
@@ -154,11 +206,7 @@ def test_preview(browser, url):
             assert page.locator(".categories").evaluate("el => { el.scrollLeft = 160; return el.scrollLeft > 0 && getComputedStyle(el).scrollbarWidth === 'none'; }")
             screenshot(page, "mobile-scrolled")
             page.evaluate("window.scrollTo(0, 0)")
-    page.emulate_media(reduced_motion="reduce")
-    panel = settings(page)
-    assert panel.evaluate("el => getComputedStyle(el).animationName") == "none"
-    close(page)
-    page.emulate_media(reduced_motion="no-preference")
+    test_motion(page)
     assert not external, f"Unexpected remote requests: {external}"
     # Check Enter navigation after measuring passive page traffic.
     page.set_viewport_size({"width": 1586, "height": 992})
@@ -196,6 +244,7 @@ def test_extension(playwright, executable):
           image.onerror = () => resolve(false);
           image.src = url;
         })""", expected_wallpaper), "Production wallpaper failed to load"
+        test_motion(page)
         expect(page.locator(".bookmark-tile")).to_have_count(0)
         ids = page.evaluate("""async () => {
           const root = (await chrome.bookmarks.getTree())[0].children[0].id;

@@ -1,11 +1,16 @@
 import type { CSSProperties } from "react";
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { Check, ChevronRight, X } from "lucide-react";
 import { Dialog } from "../../components/Dialog";
 import { wallpaper } from "./api";
 import { defaults } from "./model";
 import type { Preferences } from "./model";
 import type { UpdatePreferences } from "./useBookmarks";
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+function subscribeMotion(onChange: () => void) {
+  reducedMotion.addEventListener("change", onChange);
+  return () => reducedMotion.removeEventListener("change", onChange);
+}
 function Toggle({
   label,
   checked,
@@ -43,6 +48,11 @@ export function SettingsPanel({
   error: string;
   onClose: () => void;
 }) {
+  const systemReducedMotion = useSyncExternalStore(
+    subscribeMotion,
+    () => reducedMotion.matches,
+  );
+  const motion = prefs.motion ?? !systemReducedMotion;
   const file = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState("");
   async function upload(image?: File) {
@@ -213,6 +223,11 @@ export function SettingsPanel({
                   }
                 />
               </label>
+              <Toggle
+                label="过渡动画"
+                checked={motion}
+                onChange={() => update({ motion: !motion })}
+              />
             </section>
             {toggles.map((section) => (
               <section className="settings-section" key={section.title}>
