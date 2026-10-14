@@ -42,47 +42,49 @@ export function BookmarkMenu({
         items[next]?.focus();
       }}
     >
-      <div role="menu" aria-label={item.title}>
-        <a
-          role="menuitem"
-          href={item.safe ? item.url : undefined}
-          aria-disabled={!item.safe}
-          tabIndex={item.safe ? 0 : -1}
-          onClick={(event) => {
-            if (!item.safe) event.preventDefault();
-            else onClose();
-          }}
-        >
-          <ArrowUpRight size={18} />
-          打开
-        </a>
-        <a
-          role="menuitem"
-          href={item.safe ? item.url : undefined}
-          aria-disabled={!item.safe}
-          tabIndex={item.safe ? 0 : -1}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(event) => {
-            if (!item.safe) event.preventDefault();
-            else onClose();
-          }}
-        >
-          <ExternalLink size={17} />
-          在新标签页打开
-        </a>
-        <hr />
-        <button
-          role="menuitem"
-          onClick={() => {
-            onPin();
-            onClose();
-          }}
-        >
-          {pinned ? <PinOff size={17} /> : <Pin size={17} />}
-          {pinned ? "取消固定" : "固定到常用"}
-        </button>
-      </div>
+      {(close) => (
+        <div role="menu" aria-label={item.title}>
+          <a
+            role="menuitem"
+            href={item.safe ? item.url : undefined}
+            aria-disabled={!item.safe}
+            tabIndex={item.safe ? 0 : -1}
+            onClick={(event) => {
+              if (!item.safe) event.preventDefault();
+              else close();
+            }}
+          >
+            <ArrowUpRight size={18} />
+            打开
+          </a>
+          <a
+            role="menuitem"
+            href={item.safe ? item.url : undefined}
+            aria-disabled={!item.safe}
+            tabIndex={item.safe ? 0 : -1}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(event) => {
+              if (!item.safe) event.preventDefault();
+              else close();
+            }}
+          >
+            <ExternalLink size={17} />
+            在新标签页打开
+          </a>
+          <hr />
+          <button
+            role="menuitem"
+            onClick={() => {
+              onPin();
+              close();
+            }}
+          >
+            {pinned ? <PinOff size={17} /> : <Pin size={17} />}
+            {pinned ? "取消固定" : "固定到常用"}
+          </button>
+        </div>
+      )}
     </Dialog>
   );
 }

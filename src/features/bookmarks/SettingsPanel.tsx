@@ -103,143 +103,149 @@ export function SettingsPanel({
   ];
   return (
     <Dialog className="settings-panel glass" label="设置" onClose={onClose}>
-      <header className="dialog-header">
-        <h2>设置</h2>
-        <button
-          className="close-button"
-          aria-label="关闭设置"
-          onClick={onClose}
-        >
-          <X size={18} />
-        </button>
-      </header>
-      <div className="settings-body">
-        <section className="settings-section appearance-section">
-          <h3>外观</h3>
-          <div className="theme-card">
-            <img src={prefs.wallpaper || wallpaper} alt="云屿壁纸预览" />
-            <div>
-              <strong>云屿</strong>
-              <span>A · 玻璃桌面</span>
-            </div>
-            <Check size={24} />
-          </div>
-          <div className="appearance-actions">
-            <div className="theme-switch" aria-label="配色模式">
-              <button
-                aria-pressed={prefs.theme === "light"}
-                onClick={() => update({ theme: "light" })}
-              >
-                浅色
-              </button>
-              <button
-                aria-pressed={prefs.theme === "dark"}
-                onClick={() => update({ theme: "dark" })}
-              >
-                深色
-              </button>
-            </div>
+      {(close) => (
+        <>
+          <header className="dialog-header">
+            <h2>设置</h2>
             <button
-              className="text-button"
-              onClick={() => file.current?.click()}
+              className="close-button"
+              aria-label="关闭设置"
+              onClick={close}
             >
-              更换壁纸
-              <ChevronRight size={15} />
+              <X size={18} />
             </button>
-          </div>
-          <input
-            ref={file}
-            className="file-input"
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            aria-label="选择壁纸"
-            onChange={(event) => {
-              void upload(event.target.files?.[0]);
-              event.target.value = "";
-            }}
-          />
-          {prefs.wallpaper && (
-            <button
-              className="reset-wallpaper text-button"
-              onClick={() => update({ wallpaper: "" })}
-            >
-              恢复云海壁纸
-            </button>
-          )}
-          {uploadError && (
-            <p role="alert" className="inline-error">
-              {uploadError}
-            </p>
-          )}
-          <label className="range-setting">
-            <span>
-              面板不透明度<output>{prefs.opacity}%</output>
-            </span>
-            <input
-              aria-label="面板不透明度"
-              style={
-                {
-                  "--range-progress": `${((prefs.opacity - 20) / 75) * 100}%`,
-                } as CSSProperties
-              }
-              type="range"
-              min="20"
-              max="95"
-              value={prefs.opacity}
-              onChange={(event) =>
-                update({ opacity: Number(event.target.value) })
-              }
-            />
-          </label>
-          <label className="range-setting">
-            <span>
-              玻璃模糊<output>{prefs.blur} px</output>
-            </span>
-            <input
-              aria-label="玻璃模糊"
-              style={
-                {
-                  "--range-progress": `${(prefs.blur / 40) * 100}%`,
-                } as CSSProperties
-              }
-              type="range"
-              min="0"
-              max="40"
-              value={prefs.blur}
-              onChange={(event) => update({ blur: Number(event.target.value) })}
-            />
-          </label>
-        </section>
-        {toggles.map((section) => (
-          <section className="settings-section" key={section.title}>
-            <h3>{section.title}</h3>
-            {section.options.map(([key, label]) => (
-              <Toggle
-                key={key}
-                label={label}
-                checked={prefs[key]}
-                onChange={() => update({ [key]: !prefs[key] })}
+          </header>
+          <div className="settings-body">
+            <section className="settings-section appearance-section">
+              <h3>外观</h3>
+              <div className="theme-card">
+                <img src={prefs.wallpaper || wallpaper} alt="云屿壁纸预览" />
+                <div>
+                  <strong>云屿</strong>
+                  <span>A · 玻璃桌面</span>
+                </div>
+                <Check size={24} />
+              </div>
+              <div className="appearance-actions">
+                <div className="theme-switch" aria-label="配色模式">
+                  <button
+                    aria-pressed={prefs.theme === "light"}
+                    onClick={() => update({ theme: "light" })}
+                  >
+                    浅色
+                  </button>
+                  <button
+                    aria-pressed={prefs.theme === "dark"}
+                    onClick={() => update({ theme: "dark" })}
+                  >
+                    深色
+                  </button>
+                </div>
+                <button
+                  className="text-button"
+                  onClick={() => file.current?.click()}
+                >
+                  更换壁纸
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+              <input
+                ref={file}
+                className="file-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                aria-label="选择壁纸"
+                onChange={(event) => {
+                  void upload(event.target.files?.[0]);
+                  event.target.value = "";
+                }}
               />
+              {prefs.wallpaper && (
+                <button
+                  className="reset-wallpaper text-button"
+                  onClick={() => update({ wallpaper: "" })}
+                >
+                  恢复云海壁纸
+                </button>
+              )}
+              {uploadError && (
+                <p role="alert" className="inline-error">
+                  {uploadError}
+                </p>
+              )}
+              <label className="range-setting">
+                <span>
+                  面板不透明度<output>{prefs.opacity}%</output>
+                </span>
+                <input
+                  aria-label="面板不透明度"
+                  style={
+                    {
+                      "--range-progress": `${((prefs.opacity - 20) / 75) * 100}%`,
+                    } as CSSProperties
+                  }
+                  type="range"
+                  min="20"
+                  max="95"
+                  value={prefs.opacity}
+                  onChange={(event) =>
+                    update({ opacity: Number(event.target.value) })
+                  }
+                />
+              </label>
+              <label className="range-setting">
+                <span>
+                  玻璃模糊<output>{prefs.blur} px</output>
+                </span>
+                <input
+                  aria-label="玻璃模糊"
+                  style={
+                    {
+                      "--range-progress": `${(prefs.blur / 40) * 100}%`,
+                    } as CSSProperties
+                  }
+                  type="range"
+                  min="0"
+                  max="40"
+                  value={prefs.blur}
+                  onChange={(event) =>
+                    update({ blur: Number(event.target.value) })
+                  }
+                />
+              </label>
+            </section>
+            {toggles.map((section) => (
+              <section className="settings-section" key={section.title}>
+                <h3>{section.title}</h3>
+                {section.options.map(([key, label]) => (
+                  <Toggle
+                    key={key}
+                    label={label}
+                    checked={prefs[key]}
+                    onChange={() => update({ [key]: !prefs[key] })}
+                  />
+                ))}
+              </section>
             ))}
-          </section>
-        ))}
-      </div>
-      <footer className="settings-footer">
-        <p role="status" className={error ? "inline-error" : "save-status"}>
-          {error || (saving ? "正在保存…" : "偏好已保存到此设备")}
-        </p>
-        <div>
-          <button
-            className="text-button"
-            onClick={() =>
-              update((current) => ({ ...defaults, pins: current.pins }))
-            }
-          >
-            恢复默认
-          </button>
-          <span>Esc 关闭</span>
-        </div>
-      </footer>
+          </div>
+          <footer className="settings-footer">
+            <p role="status" className={error ? "inline-error" : "save-status"}>
+              {error || (saving ? "正在保存…" : "偏好已保存到此设备")}
+            </p>
+            <div>
+              <button
+                className="text-button"
+                onClick={() =>
+                  update((current) => ({ ...defaults, pins: current.pins }))
+                }
+              >
+                恢复默认
+              </button>
+              <span>Esc 关闭</span>
+            </div>
+          </footer>
+        </>
+      )}
     </Dialog>
   );
 }

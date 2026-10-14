@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode, CSSProperties, KeyboardEventHandler } from "react";
 export function Dialog({
   children,
@@ -8,13 +8,23 @@ export function Dialog({
   style,
   onKeyDown,
 }: {
-  children: ReactNode;
+  children: ReactNode | ((close: () => void) => ReactNode);
   className: string;
   label: string;
   onClose: () => void;
   style?: CSSProperties;
   onKeyDown?: KeyboardEventHandler<HTMLDialogElement>;
 }) {
+  const [closing, setClosing] = useState(false);
+  const close = () => setClosing(true);
+  useEffect(() => {
+    if (!closing) return;
+    const timer = window.setTimeout(
+      onClose,
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 160,
+    );
+    return () => window.clearTimeout(timer);
+  }, [closing, onClose]);
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = ref.current!;
@@ -32,11 +42,12 @@ export function Dialog({
     <dialog
       ref={ref}
       className={className}
+      data-closing={closing || undefined}
       aria-label={label}
       style={style}
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        close();
       }}
       onKeyDown={onKeyDown}
       onClick={(event) => {
@@ -48,11 +59,11 @@ export function Dialog({
             event.clientY < box.top ||
             event.clientY > box.bottom
           )
-            onClose();
+            close();
         }
       }}
     >
-      {children}
+      {typeof children === "function" ? children(close) : children}
     </dialog>
   );
 }

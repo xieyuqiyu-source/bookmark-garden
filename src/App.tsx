@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
+import { SortControl } from "./features/bookmarks/SortControl";
 import { DesktopToolbar } from "./features/bookmarks/DesktopToolbar";
 import { BookmarkTile } from "./features/bookmarks/BookmarkTile";
 import type { MenuTarget } from "./features/bookmarks/BookmarkTile";
@@ -124,7 +125,6 @@ export default function App() {
                 <BookmarkTile
                   key={item.id}
                   item={item}
-                  pinned
                   newTab={prefs.newTab}
                   onMenu={setMenu}
                 />
@@ -159,16 +159,7 @@ export default function App() {
             ))}
           </nav>
           <div className="view-controls">
-            <select
-              className="glass"
-              aria-label="书签排序"
-              value={sort}
-              onChange={(event) => setSort(event.target.value)}
-            >
-              <option value="original">书签顺序</option>
-              <option value="title">名称排序</option>
-              <option value="recent">最近添加</option>
-            </select>
+            <SortControl value={sort} onChange={setSort} />
             <button
               className="glass"
               aria-label="紧凑图标"
@@ -185,7 +176,7 @@ export default function App() {
           </div>
         ) : groups.length ? (
           <>
-            <div className="folder-panels">
+            <div className="folder-panels" key={selected}>
               {groups.slice(0, limit).map((group) => (
                 <FolderPanel
                   key={group.id}

@@ -1,4 +1,3 @@
-import { MoreHorizontal, Pin } from "lucide-react";
 import { SiteIcon } from "./DesignIcon";
 import type { Bookmark } from "./model";
 export interface MenuTarget {
@@ -8,12 +7,10 @@ export interface MenuTarget {
 }
 export function BookmarkTile({
   item,
-  pinned,
   newTab,
   onMenu,
 }: {
   item: Bookmark;
-  pinned: boolean;
   newTab: boolean;
   onMenu: (target: MenuTarget) => void;
 }) {
@@ -27,6 +24,7 @@ export function BookmarkTile({
       onContextMenu={(event) => {
         event.preventDefault();
         event.stopPropagation();
+        event.currentTarget.querySelector("a")?.focus({ preventScroll: true });
         onMenu({ item, x: event.clientX, y: event.clientY });
       }}
       onKeyDown={(event) => {
@@ -41,6 +39,8 @@ export function BookmarkTile({
     >
       <a
         className="bookmark-link"
+        tabIndex={0}
+        aria-haspopup="menu"
         href={item.safe ? item.url : undefined}
         aria-disabled={!item.safe}
         target={newTab ? "_blank" : undefined}
@@ -57,17 +57,6 @@ export function BookmarkTile({
         <SiteIcon item={item} />
         <span className="bookmark-name">{item.title}</span>
       </a>
-      {pinned && (
-        <Pin className="pin-indicator" size={12} aria-label="已固定" />
-      )}
-      <button
-        className="tile-menu"
-        aria-label={`${item.title}的操作`}
-        aria-haspopup="menu"
-        onClick={(event) => menu(event.currentTarget)}
-      >
-        <MoreHorizontal size={17} />
-      </button>
     </div>
   );
 }

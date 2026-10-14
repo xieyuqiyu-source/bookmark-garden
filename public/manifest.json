@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "栖页 · 书签启动台",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "将 Chrome 书签自动整理成大图标导航桌面。本地搜索、文件夹分类和固定常用入口。",
   "minimum_chrome_version": "114",
   "permissions": [

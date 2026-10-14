@@ -238,7 +238,7 @@ button:active {
   gap: 6px;
   width: 100%;
   overflow-x: auto;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   padding: 5px 0;
 }
 .pinned-grid .bookmark-tile {
@@ -309,53 +309,6 @@ button:active {
 .folder-dialog .bookmark-name {
   font-size: 15px;
 }
-.tile-menu {
-  display: grid;
-  place-items: center;
-  position: absolute;
-  right: calc(50% - 39px);
-  top: 0;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: var(--popup);
-  box-shadow: 0 1px 5px #142a4412;
-  opacity: 0;
-  z-index: 1;
-}
-.bookmark-tile:hover .tile-menu,
-.bookmark-tile:focus-within .tile-menu {
-  opacity: 1;
-}
-.tile-menu:hover {
-  background: var(--popup);
-}
-.pin-indicator {
-  position: absolute;
-  right: calc(50% - 35px);
-  top: 0;
-  background: white;
-  padding: 5px;
-  box-sizing: content-box;
-  border-radius: 50%;
-  color: #235d78;
-  pointer-events: none;
-}
-.pinned-grid .tile-menu {
-  right: calc(50% - 49px);
-}
-.pinned-grid .pin-indicator {
-  right: calc(50% - 47px);
-}
-.bookmark-tile:hover .pin-indicator {
-  opacity: 0;
-}
-.folder-panels .pin-indicator {
-  width: 9px;
-  height: 9px;
-  padding: 3px;
-  right: calc(50% - 30px);
-}
 .category-row {
   display: flex;
   align-items: center;
@@ -368,7 +321,7 @@ button:active {
   align-items: center;
   gap: 12px;
   overflow: auto;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   flex: 1;
   white-space: nowrap;
   padding: 0;
@@ -396,15 +349,7 @@ button:active {
   gap: 20px;
   flex-shrink: 0;
 }
-.view-controls select {
-  width: 128px;
-  height: 40px;
-  border-radius: 24px;
-  padding: 0 17px;
-  cursor: pointer;
-  font-size: 13px;
-}
-.view-controls button {
+.view-controls > button {
   display: grid;
   place-items: center;
   width: 60px;
@@ -412,7 +357,7 @@ button:active {
   border-radius: 24px;
   background: rgba(var(--surface), 0.75);
 }
-.view-controls button[aria-pressed="true"] {
+.view-controls > button[aria-pressed="true"] {
   box-shadow: inset 0 0 0 2px var(--accent);
 }
 .folder-panels {
@@ -764,14 +709,6 @@ button:active {
   .folder-path {
     font-size: 14px;
   }
-  .tile-menu {
-    opacity: 1;
-    width: 22px;
-    height: 22px;
-  }
-  .pin-indicator {
-    display: none;
-  }
   .desktop-footer {
     align-items: flex-start;
     margin-inline: 0;
@@ -859,6 +796,164 @@ button:active {
     animation: none !important;
   }
 }
-.pin-indicator {
+
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
   display: none;
+}
+.folder-panel .folder-title {
+  max-width: 100%;
+  width: 100%;
+}
+.sort-control {
+  display: flex;
+}
+.sort-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 128px;
+  height: 40px;
+  border-radius: 24px;
+  padding: 0 17px;
+  font-size: 13px;
+}
+.sort-trigger svg {
+  transition: transform 180ms ease;
+}
+.sort-trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+.sort-menu {
+  width: 184px;
+}
+.sort-menu button {
+  justify-content: space-between;
+}
+.sort-menu button svg {
+  visibility: hidden;
+}
+.sort-menu button[aria-checked="true"] {
+  background: var(--selected);
+}
+.sort-menu button[aria-checked="true"] svg {
+  visibility: visible;
+}
+.folder-panel {
+  animation: panel-enter 280ms ease-out both;
+}
+.folder-panel:nth-child(2) {
+  animation-delay: 30ms;
+}
+.folder-panel:nth-child(3) {
+  animation-delay: 60ms;
+}
+.folder-panel:nth-child(4) {
+  animation-delay: 90ms;
+}
+.search-popover {
+  animation: popover-enter 180ms ease-out both;
+  transform-origin: top center;
+}
+.search-scrim {
+  animation: scrim-enter 180ms ease-out both;
+}
+dialog[open] {
+  animation: popover-enter 200ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+dialog.settings-panel[open] {
+  animation: drawer-enter 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+dialog[open]::backdrop {
+  animation: scrim-enter 180ms ease-out both;
+}
+dialog[data-closing] {
+  animation: popover-exit 160ms ease-in both;
+  pointer-events: none;
+}
+dialog.settings-panel[data-closing] {
+  animation: drawer-exit 160ms ease-in both;
+}
+dialog[data-closing]::backdrop {
+  animation: scrim-exit 160ms ease-in both;
+}
+.site-icon {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.bookmark-link:hover .site-icon {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 20px #26455e15;
+}
+.bookmark-link:active .site-icon {
+  transform: scale(0.95);
+}
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes popover-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes popover-exit {
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+@keyframes drawer-enter {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes drawer-exit {
+  to {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+}
+@keyframes scrim-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scrim-exit {
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  dialog::backdrop {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }

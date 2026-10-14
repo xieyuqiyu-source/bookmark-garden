@@ -10,14 +10,17 @@ ARTIFACTS = ROOT / "artifacts" / "verification"
 ARTIFACTS.mkdir(parents=True, exist_ok=True)
 
 def screenshot(page, name):
-    page.screenshot(path=str(ARTIFACTS / f"{name}.png"))
+    page.screenshot(path=str(ARTIFACTS / f"{name}.png"), animations="disabled")
 
 def settings(page):
     page.get_by_role("button", name="设置", exact=True).click()
     return page.get_by_role("dialog", name="设置", exact=True)
 
 def close(page):
+    count = page.locator("dialog[open]").count()
     page.keyboard.press("Escape")
+    if count:
+        expect(page.locator("dialog[open]")).to_have_count(count - 1)
 
 def no_overflow(page):
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Horizontal overflow"
@@ -53,7 +56,7 @@ def test_preview(browser, url):
     close(page)
 
     design = page.locator(".folder-panel").filter(has_text="设计与灵感")
-    design.get_by_role("button", name="Dribbble的操作", exact=True).click()
+    design.get_by_role("link", name="Dribbble", exact=True).click(button="right")
     screenshot(page, "bookmark-menu")
     page.keyboard.press("End")
     expect(page.get_by_role("menuitem", name="固定到常用")).to_be_focused()
@@ -61,7 +64,7 @@ def test_preview(browser, url):
     expect(page.locator(".pinned-grid .bookmark-tile")).to_have_count(9)
     page.reload()
     expect(page.locator(".pinned-grid .bookmark-tile")).to_have_count(9)
-    page.locator(".pinned-panel").get_by_role("button", name="Dribbble的操作", exact=True).click()
+    page.locator(".pinned-panel").get_by_role("link", name="Dribbble", exact=True).click(button="right")
     page.get_by_role("menuitem", name="取消固定").click()
     expect(page.locator(".pinned-grid .bookmark-tile")).to_have_count(8)
 
@@ -69,13 +72,33 @@ def test_preview(browser, url):
     folder = page.get_by_role("dialog", name="书签栏 / 设计与灵感", exact=True)
     expect(folder.locator(".bookmark-tile")).to_have_count(8)
     screenshot(page, "folder")
-    folder.get_by_role("button", name="Dribbble的操作", exact=True).click()
+    folder.get_by_role("link", name="Dribbble", exact=True).click(button="right")
     close(page)
     expect(folder).to_be_visible()
     close(page)
     expect(page.get_by_role("button", name="展开设计与灵感", exact=True)).to_be_focused()
 
+    expect(page.locator(".tile-menu")).to_have_count(0)
+    expect(page.locator(".folder-header .icon-button")).to_have_count(0)
+    sorter = page.get_by_role("button", name="书签排序：书签顺序", exact=True)
+    sorter.click()
+    expect(page.get_by_role("menuitemradio", name="书签顺序")).to_have_attribute("aria-checked", "true")
+    screenshot(page, "sort-menu")
+    page.keyboard.press("ArrowDown")
+    page.keyboard.press("Enter")
+    expect(page.get_by_role("dialog", name="书签排序", exact=True)).to_have_count(0)
+    page.get_by_role("button", name="书签排序：名称排序", exact=True).click()
+    expect(page.get_by_role("menuitemradio", name="名称排序")).to_have_attribute("aria-checked", "true")
+    page.get_by_role("menuitemradio", name="书签顺序", exact=True).click()
+    expect(page.get_by_role("dialog", name="书签排序", exact=True)).to_have_count(0)
+    # Right-click alternatives remain available to keyboard users.
+    design.get_by_role("link", name="Dribbble", exact=True).focus()
+    page.keyboard.press("Shift+F10")
+    expect(page.get_by_role("menuitem", name="固定到常用")).to_be_visible()
+    close(page)
+    expect(design.get_by_role("link", name="Dribbble", exact=True)).to_be_focused()
     panel = settings(page)
+    assert panel.evaluate("el => getComputedStyle(el).animationName") == "drawer-enter"
     screenshot(page, "settings")
     panel.get_by_role("button", name="深色", exact=True).click()
     for name in ["紧凑图标", "显示时间", "显示欢迎语", "显示文件夹路径", "显示常用网站", "在新标签页打开网站"]:
@@ -126,8 +149,16 @@ def test_preview(browser, url):
             expect(panel.get_by_role("switch", name="在新标签页打开网站")).to_be_in_viewport()
             close(page)
             page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            assert page.evaluate("window.scrollY > 0")
+            assert page.evaluate("getComputedStyle(document.documentElement).scrollbarWidth") == "none"
+            assert page.locator(".categories").evaluate("el => { el.scrollLeft = 160; return el.scrollLeft > 0 && getComputedStyle(el).scrollbarWidth === 'none'; }")
             screenshot(page, "mobile-scrolled")
             page.evaluate("window.scrollTo(0, 0)")
+    page.emulate_media(reduced_motion="reduce")
+    panel = settings(page)
+    assert panel.evaluate("el => getComputedStyle(el).animationName") == "none"
+    close(page)
+    page.emulate_media(reduced_motion="no-preference")
     assert not external, f"Unexpected remote requests: {external}"
     # Check Enter navigation after measuring passive page traffic.
     page.set_viewport_size({"width": 1586, "height": 992})
@@ -182,7 +213,7 @@ def test_extension(playwright, executable):
         expect(page.get_by_role("button", name="展开空文件夹", exact=True)).to_be_visible()
         page.get_by_role("button", name="全部书签", exact=True).click()
         before = page.evaluate("chrome.bookmarks.getTree()")
-        page.get_by_role("button", name="测试 Figma的操作", exact=True).click()
+        page.get_by_role("link", name="测试 Figma", exact=True).click(button="right")
         page.get_by_role("menuitem", name="固定到常用").click()
         expect(page.locator(".pinned-grid .bookmark-tile")).to_have_count(1)
         assert before == page.evaluate("chrome.bookmarks.getTree()"), "Pinning modified source bookmarks"

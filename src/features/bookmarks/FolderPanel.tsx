@@ -37,17 +37,21 @@ export function FolderPanel({
   onOpen,
 }: Props & { onOpen: () => void }) {
   return (
-    <section className="folder-panel glass" aria-label={group.title}>
+    <section
+      className="folder-panel glass"
+      aria-label={group.title}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        onOpen();
+      }}
+    >
       <header className="folder-header">
-        <button className="folder-title" onClick={onOpen}>
-          <FolderName group={group} showPath={preferences.showFolderPath} />
-        </button>
         <button
-          className="icon-button"
+          className="folder-title"
           aria-label={`展开${group.title}`}
           onClick={onOpen}
         >
-          <DesignIcon name="img2" size={24} />
+          <FolderName group={group} showPath={preferences.showFolderPath} />
         </button>
       </header>
       <div className="bookmark-grid">
@@ -55,7 +59,6 @@ export function FolderPanel({
           <BookmarkTile
             key={item.id}
             item={item}
-            pinned={preferences.pins.includes(item.id)}
             newTab={preferences.newTab}
             onMenu={onMenu}
           />
@@ -78,37 +81,45 @@ export function FolderDialog({
       label={group.path}
       onClose={onClose}
     >
-      <header className="folder-header">
-        <div className="folder-title">
-          <FolderName group={group} showPath={preferences.showFolderPath} />
-        </div>
-        <button
-          className="close-button"
-          aria-label="关闭文件夹"
-          onClick={onClose}
-        >
-          <X size={18} />
-        </button>
-      </header>
-      <div className="folder-content">
-        <div className="bookmark-grid">
-          {group.items.slice(0, limit).map((item) => (
-            <BookmarkTile
-              key={item.id}
-              item={item}
-              pinned={preferences.pins.includes(item.id)}
-              newTab={preferences.newTab}
-              onMenu={onMenu}
-            />
-          ))}
-        </div>
-        {!group.items.length && <div className="folder-empty">暂无书签</div>}
-        {group.items.length > limit && (
-          <button className="load-more" onClick={() => setLimit(limit + 120)}>
-            显示更多
-          </button>
-        )}
-      </div>
+      {(close) => (
+        <>
+          <header className="folder-header">
+            <div className="folder-title">
+              <FolderName group={group} showPath={preferences.showFolderPath} />
+            </div>
+            <button
+              className="close-button"
+              aria-label="关闭文件夹"
+              onClick={close}
+            >
+              <X size={18} />
+            </button>
+          </header>
+          <div className="folder-content">
+            <div className="bookmark-grid">
+              {group.items.slice(0, limit).map((item) => (
+                <BookmarkTile
+                  key={item.id}
+                  item={item}
+                  newTab={preferences.newTab}
+                  onMenu={onMenu}
+                />
+              ))}
+            </div>
+            {!group.items.length && (
+              <div className="folder-empty">暂无书签</div>
+            )}
+            {group.items.length > limit && (
+              <button
+                className="load-more"
+                onClick={() => setLimit(limit + 120)}
+              >
+                显示更多
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </Dialog>
   );
 }
