@@ -1,4 +1,4 @@
-import { demoTree } from "./demo";
+import { demoTree, demoPins } from "./demo";
 import { defaults, normalizePreferences } from "./model";
 import type { Preferences, TreeNode } from "./model";
 export const isExtension =
@@ -12,7 +12,9 @@ export async function readPreferences(): Promise<Preferences> {
       (await chrome.storage.local.get("preferences")).preferences,
     );
   const stored = localStorage.getItem("qiye-preview");
-  return stored ? normalizePreferences(JSON.parse(stored)) : defaults;
+  return stored
+    ? normalizePreferences(JSON.parse(stored))
+    : { ...defaults, pins: demoPins };
 }
 export async function writePreferences(preferences: Preferences) {
   if (isExtension) await chrome.storage.local.set({ preferences });

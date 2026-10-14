@@ -8,6 +8,9 @@ import {
 } from "./api";
 import { defaults, flattenTree } from "./model";
 import type { Preferences } from "./model";
+export type UpdatePreferences = (
+  change: Partial<Preferences> | ((current: Preferences) => Preferences),
+) => void;
 export function useBookmarks() {
   const [data, setData] = useState<ReturnType<typeof flattenTree>>({
     bookmarks: [],
@@ -18,6 +21,10 @@ export function useBookmarks() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const request = useRef(0);
+  const current = useRef(defaults);
+  const confirmed = useRef(defaults);
+  const pending = useRef(0);
+  const queue = useRef(Promise.resolve());
   const reload = useCallback(async () => {
     const version = ++request.current;
     try {
@@ -34,20 +41,29 @@ export function useBookmarks() {
     }
   }, []);
   useEffect(() => {
-    // Synchronize external Chrome data after mounting.
+    let active = true;
+    // Read the browser bookmark tree after mounting.
     // eslint-disable-next-line react/set-state-in-effect
     void reload();
+    const accept = (value: Preferences) => {
+      if (!active || pending.current) return;
+      current.current = confirmed.current = value;
+      setPreferences(value);
+    };
     void readPreferences()
-      .then(setPreferences)
-      .catch(() => setError("偏好设置读取失败，暂时使用默认设置。"));
+      .then(accept)
+      .catch(() => {
+        if (active) setError("偏好设置读取失败，暂时使用默认设置。");
+      });
     let timer: ReturnType<typeof setTimeout>;
     const unsubscribe = subscribeBookmarks(() => {
       clearTimeout(timer);
       timer = setTimeout(() => void reload(), 120);
     });
-    const unPrefs = subscribePreferences(setPreferences);
-    // Invalidate in-flight requests; this ref is a generation counter, not a DOM node.
+    const unPrefs = subscribePreferences(accept);
     return () => {
+      active = false;
+      // This ref is a request generation counter, not a DOM node.
       // eslint-disable-next-line react-hooks/exhaustive-deps
       request.current++;
       clearTimeout(timer);
@@ -55,18 +71,33 @@ export function useBookmarks() {
       unPrefs();
     };
   }, [reload]);
-  async function updatePreferences(next: Preferences) {
+  const updatePreferences: UpdatePreferences = (change) => {
+    const next =
+      typeof change === "function"
+        ? change(current.current)
+        : { ...current.current, ...change };
+    current.current = next;
+    setPreferences(next);
     setSaving(true);
-    try {
-      await writePreferences(next);
-      setPreferences(next);
-      setError("");
-    } catch {
-      setError("设置保存失败，请检查浏览器存储空间后重试。");
-    } finally {
-      setSaving(false);
-    }
-  }
+    pending.current++;
+    // Serialize writes so a slower slider update cannot overwrite a newer pin or toggle.
+    queue.current = queue.current.then(async () => {
+      try {
+        await writePreferences(next);
+        confirmed.current = next;
+        setError("");
+      } catch {
+        setError("设置保存失败，请检查浏览器存储空间后重试。");
+        if (pending.current === 1) {
+          current.current = confirmed.current;
+          setPreferences(confirmed.current);
+        }
+      } finally {
+        pending.current--;
+        if (!pending.current) setSaving(false);
+      }
+    });
+  };
   return {
     ...data,
     preferences,

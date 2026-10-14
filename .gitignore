@@ -30,3 +30,6 @@ releases/
 .env
 .env.*
 *.tsbuildinfo
+
+.venv/
+__pycache__/

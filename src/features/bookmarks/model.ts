@@ -21,6 +21,7 @@ export interface Folder {
   title: string;
   path: string;
   depth: number;
+  ancestors: string[];
   count: number;
 }
 export interface Preferences {
@@ -28,12 +29,26 @@ export interface Preferences {
   theme: "light" | "dark";
   compact: boolean;
   newTab: boolean;
+  showTime: boolean;
+  showWelcome: boolean;
+  showFolderPath: boolean;
+  showPinned: boolean;
+  opacity: number;
+  blur: number;
+  wallpaper: string;
 }
 export const defaults: Preferences = {
   pins: [],
   theme: "light",
   compact: false,
   newTab: true,
+  showTime: true,
+  showWelcome: true,
+  showFolderPath: true,
+  showPinned: true,
+  opacity: 62,
+  blur: 18,
+  wallpaper: "",
 };
 export function normalizePreferences(value: unknown): Preferences {
   const data = (
@@ -50,6 +65,20 @@ export function normalizePreferences(value: unknown): Preferences {
     theme: data.theme === "dark" ? "dark" : "light",
     compact: data.compact === true,
     newTab: data.newTab !== false,
+    showTime: data.showTime !== false,
+    showWelcome: data.showWelcome !== false,
+    showFolderPath: data.showFolderPath !== false,
+    showPinned: data.showPinned !== false,
+    opacity: boundedNumber(data.opacity, 20, 95, defaults.opacity),
+    blur: boundedNumber(data.blur, 0, 40, defaults.blur),
+    wallpaper:
+      typeof data.wallpaper === "string" &&
+      data.wallpaper.length <= 4_200_000 &&
+      /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(
+        data.wallpaper,
+      )
+        ? data.wallpaper
+        : "",
   };
 }
 export function flattenTree(tree: TreeNode[]) {
@@ -88,6 +117,7 @@ export function flattenTree(tree: TreeNode[]) {
           title: node.title || "未命名文件夹",
           path: path.join(" / "),
           depth: ancestors.length,
+          ancestors,
           count: 0,
         };
         folders.push(folder);
@@ -124,4 +154,47 @@ export function selectBookmarks(
     result.sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
   if (sort === "recent") result.sort((a, b) => b.dateAdded - a.dateAdded);
   return result;
+}
+
+function boundedNumber(
+  value: unknown,
+  min: number,
+  max: number,
+  fallback: number,
+) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.min(max, Math.max(min, Math.round(value)))
+    : fallback;
+}
+
+export function groupBookmarks(
+  bookmarks: Bookmark[],
+  folders: Folder[],
+  selected: string,
+) {
+  const visible =
+    selected === "all"
+      ? folders
+      : folders.filter(
+          (folder) =>
+            folder.id === selected || folder.ancestors.includes(selected),
+        );
+  const groups = visible
+    .map((folder) => ({
+      ...folder,
+      items: bookmarks.filter((item) => item.folderId === folder.id),
+    }))
+    .filter((folder) => folder.items.length || folder.count === 0);
+  const loose = bookmarks.filter((item) => !item.folderId);
+  if (selected === "all" && loose.length)
+    groups.unshift({
+      id: "loose",
+      title: "未分类",
+      path: "未分类",
+      depth: 0,
+      ancestors: [],
+      count: loose.length,
+      items: loose,
+    });
+  return groups;
 }

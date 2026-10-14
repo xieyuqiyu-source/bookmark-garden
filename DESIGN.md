@@ -1,186 +1,42 @@
----
-name: 栖页 · 书签启动台
-description: 本地书签的大图标桌面
-colors:
-  bg: "#f7f8f5"
-  surface: "#fff"
-  sidebar: "#eef1ec"
-  text: "#29382e"
-  muted: "#67746b"
-  line: "#e0e5de"
-  accent: "#355f46"
-  active: "#dce6da"
-  hover: "#eaf0e7"
-  dark-bg: "#171e1b"
-  dark-surface: "#202a24"
-  dark-sidebar: "#1c2620"
-  dark-text: "#e2e9e0"
-  dark-muted: "#a1b1a6"
-  dark-line: "#354239"
-  dark-accent: "#acd2b3"
-  dark-active: "#344d3b"
-  dark-hover: "#2b382f"
-  sage: "#e1e8db"
-  blue: "#dce9f6"
-  rose: "#f5e0e4"
-  sand: "#f4e9cc"
-  lavender: "#e7e1f6"
-  mint: "#d9eee5"
-typography:
-  display:
-    fontFamily: '"PingFang SC","Microsoft YaHei",system-ui,sans-serif'
-    fontSize: "clamp(24px,2.6vw,36px)"
-    fontWeight: 500
-    lineHeight: 1.45
-    letterSpacing: "-.035em"
-  clock:
-    fontSize: "42px"
-    fontWeight: 300
-    lineHeight: 1
-    letterSpacing: "-2px"
-  title:
-    fontSize: "17px"
-    fontWeight: 600
-  body:
-    fontFamily: '"PingFang SC","Microsoft YaHei",system-ui,sans-serif'
-    fontSize: "14px"
-    fontWeight: 400
-  bookmark-label:
-    fontSize: "12px"
-    fontWeight: 500
-    lineHeight: 1.6
-  metadata:
-    fontSize: "9px"
-rounded:
-  control: "8px"
-  navigation: "9px"
-  tile: "14px"
-  icon: "19px"
-spacing:
-  small: "6px"
-  medium: "12px"
-  large: "18px"
-components:
-  action:
-    backgroundColor: "{colors.active}"
-    textColor: "{colors.accent}"
-    rounded: "{rounded.control}"
-    padding: "10px 18px"
-  icon-button:
-    rounded: "{rounded.control}"
-    width: "32px"
-    height: "32px"
-  navigation-active:
-    backgroundColor: "{colors.active}"
-    textColor: "{colors.accent}"
-    rounded: "{rounded.navigation}"
-    padding: "10px 14px"
-  search:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.text}"
-    rounded: "{rounded.tile}"
-    height: "58px"
-    padding: "0 20px"
-  bookmark-icon:
-    rounded: "{rounded.icon}"
-    width: "68px"
-    height: "68px"
----
+# 栖页 · A 云屿设计规范
 
-# Design System: 栖页
+实现依据是用户确认的 [Figma 文件](https://www.figma.com/design/acfysADpxG5pFDfadqOUSc?node-id=2-16)。桌面、设置侧栏、搜索结果/空结果、书签操作与文件夹浮层都沿用这一套风格。
 
-## Overview
+## 视觉基准
 
-**Creative North Star: "大图标书签桌面"**
+| 项目                | 规格                                               |
+| ------------------- | -------------------------------------------------- |
+| 桌面参考尺寸        | 1586 × 992                                         |
+| 主要文字 / 次要文字 | `#142a44` / `#50677d`                              |
+| 控件强调色          | `#235d78`                                          |
+| 面板                | 白色 62%，细白边，20px 圆角，轻阴影                |
+| 常用栏              | 白色 58%，163px 高，无标题                         |
+| 玻璃模糊            | 设置显示 18px，对应 CSS blur 9px 的 Figma 渲染基准 |
+| 中文字体            | Noto Sans SC Variable，本地打包                    |
+| 时间字体            | Inter Variable，本地打包                           |
+| 常用/展开图标       | 74px 方形底座，15px 圆角                           |
+| 文件夹卡片图标      | 52px 方形底座，13px 圆角                           |
+| 搜索框              | 最大 660px 宽，57px 高，29px 圆角                  |
+| 设置侧栏            | 420px 宽，距顶部/右侧/底部 24px，26px 圆角         |
+| 文件夹浮层          | 最大 1080px 宽，26px 圆角                          |
 
-用户确认的视觉方向是桌面风格、大图标、类似应用启动台。每个网站由独立图标、标题和小号域名组成，以较松的网格排列；侧边栏保留书签文件夹层级。
+背景采用独立云海壁纸文件；所有文本、图标底座、面板、控件和状态都由实际组件渲染，不将完整设计截图作为页面。
 
-当前实现以暖白、灰绿和低饱和图标底色形成安静的桌面。名称、配色和文案属于当前实现选择，可以调整；用户尚未确认它们是长期品牌规范。此文档从 `src/index.css` 与组件源码提取，并对照 `artifacts/desktop.png` 的桌面预览检查。
+## 布局与交互
 
-**Key Characteristics:**
+- 顶部品牌、居中搜索、外观与设置入口。
+- 欢迎语和实时日期时钟，可分别关闭。
+- 常用入口横向排列；没有固定项时收起。文件夹路径与名称同一行，长路径省略。
+- 文件夹面板为两列，每卡 4 × 2 个入口，标题及省略号可打开全部内容。
+- 搜索为顶部浮层，全局匹配标题、URL、路径，保留单行标题和次级路径。空结果只显示图标和“未找到书签”。
+- 书签操作菜单使用简短动作文案。固定状态由菜单动作切换，不添加独立解释区域。
+- 设置恢复默认保留固定列表。壁纸只从本机选取；输入校验错误、读写错误才显示必要提示。
+- 深色使用相同尺寸与布局，替换文字、玻璃面板、遮罩的语义颜色。
 
-- 大图标优先，网站标题与域名保持独立层级。
-- 左侧文件夹导航与主区域启动台形成稳定空间关系。
-- 浅深两套主题使用相同的语义颜色角色。
-- 细微悬停抬升提供点击反馈，减少动态效果时关闭动画。
+## 响应式与可访问性
 
-## Colors
+800px 以下改为单列文件夹；搜索独占一行，常用与分类可横向滚动。420px 侧栏随窄窗口缩小，内容可独立滚动。
 
-主色是沉静的森林绿，背景是带灰绿色调的暖白；彩色图标帮助扫描，不承担操作状态表达。
+所有操作可键盘到达，原生 dialog 限制模态焦点并在关闭后恢复。搜索支持上下键/回车，菜单支持方向键/Home/End，Escape 关闭最上层。尊重减少动画设置；危险协议链接禁用。
 
-### Primary
-
-`accent` 用于选中导航、时钟、焦点和操作文字；`active` 用于选中导航与动作按钮；`hover` 用于低强度悬停反馈。
-
-### Secondary
-
-`sage`、`blue`、`rose`、`sand`、`lavender`、`mint` 是网站图标的六种淡色背景，按域名稳定选择。它们不代表分类或重要程度。
-
-### Neutral
-
-`bg` 是主桌面背景，`surface` 是搜索和设置表面，`sidebar` 是左侧导航区域，`text` 与 `muted` 区分主要阅读内容和元信息，`line` 用于轻分隔。
-
-深色主题按 `dark-` 前缀对应替换上述角色，彩色图标整体降低亮度。颜色的规范值以 frontmatter 为准，实际 CSS 变量定义在应用容器而非文档根元素上。
-
-## Typography
-
-统一使用系统中文无衬线字体，不请求远程字体。欢迎标题与细字重时钟形成首屏视觉重点；书签名称保持中等字重，域名和辅助状态采用较小字号。
-
-字号层级由 frontmatter 定义。窄屏欢迎标题为（23px）、书签名称为（11px）；时钟在中等宽度下为（35px），窄屏隐藏。网站名称单行省略，完整名称和 URL 保留在链接提示中；文件夹组标题允许换行。
-
-## Layout
-
-桌面侧栏固定在左侧，宽（236px），主区域相应留出左边距；顶栏高（85px）。内容区最大宽（1350px），默认内边距（43px 58px 22px）。文件夹导航单独滚动。
-
-启动台采用自适应网格，默认最小列宽（115px），行列间距（12px、18px）。紧凑模式最小列宽（92px）；宽于（1500px）时常规列宽增加到（126px）。每批显示（120）个项目，继续显示按钮位于分组之后。
-
-在（1100px）及以下，侧栏缩至（210px），内容边距缩为（32px）。在（760px）及以下，侧栏成为可展开抽屉，主内容占满宽度；常规网格固定三列，紧凑网格四列，时钟隐藏。
-
-## Elevation & Depth
-
-页面层次主要由背景色和细边线区分。搜索框、侧栏和设置区域不依赖重阴影；网站图标具有轻投影，悬停时上移（4px）并略增强阴影。侧栏抽屉开启时使用半透明遮罩。
-
-图标默认阴影为 `0 4px 8px -6px #23362950`，悬停阴影为 `0 9px 15px -9px #23362960`。动画、断点等扩展数据记录于 `.impeccable/design.json`。
-
-## Shapes
-
-网站图标采用饱满圆角方形，常规尺寸（68px）、圆角使用 `icon`；紧凑尺寸（48px）、圆角使用 `tile`。窄屏常规图标（60px）、圆角（17px）。搜索框和图标点击区共享 `tile` 圆角，导航行和小按钮使用更克制的圆角。
-
-图钉使用圆形按钮；分组与区域分隔采用细直线。不要将每个书签再包进独立的大块面板，保持图标启动台的组织方式。
-
-## Components
-
-### Buttons
-
-文字动作使用淡色底和主色文字，内边距由 `action` 定义。图标操作具有方形点击区，悬停时显现淡色底。通用键盘焦点是（3px）主色描边，向外偏移（4px）。禁用状态降低透明度并保持不可操作。
-
-### Inputs / Fields
-
-搜索是单行宽输入区域，左侧搜索符号，右侧快捷键或清空按钮。焦点进入时边框切换主色，输入文字保持主文字颜色。设置项采用原生复选框，排序使用原生下拉列表。
-
-### Navigation
-
-导航采用图标、名称、计数的水平布局。选中行使用主色文字与淡绿底，文件夹层级通过缩进表达；长名称省略。窄屏抽屉通过菜单按钮展开，遮罩和 Escape 可关闭。
-
-### Bookmark launcher
-
-网站卡片以图标为视觉中心，标题居中，域名作为次要文本。真实扩展从 Chrome 本地图标接口读取网站图标；图标失败或示例预览时显示首字。鼠标悬停或键盘进入卡片时显示固定按钮；已固定与触摸设备始终显示。非支持协议仍可见，但不能点击跳转，并有状态符号与文字提示。
-
-### Empty and error states
-
-空状态沿用居中图标、短标题和辅助句式；无搜索结果时提供清空搜索。错误使用暖红色描边与明确文本，并给出重试操作。状态不只依赖颜色。
-
-## Do's and Don'ts
-
-### Do:
-
-- **Do** 优先保留大图标启动台的阅读层级与文件夹导航。
-- **Do** 使用语义颜色同步实现浅色和深色主题。
-- **Do** 让固定操作同时支持鼠标、键盘和触摸。
-- **Do** 对减少动态效果偏好关闭过渡动画。
-
-### Don't:
-
-- **Don't** 用彩色图标底色暗示并不存在的分类含义。
-- **Don't** 引入远程字体或外部图片作为本地桌面的默认依赖。
-- **Don't** 把当前暂定的名称和配色描述成用户已经确认的品牌承诺。
+实际书签数量与用户字体缩放会改变页面高度，因此不强制锁定整个桌面高度。设计尺寸用于基准视口，其他窗口按内容自适应。
