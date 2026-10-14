@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { faviconUrl, isExtension } from "./api";
 import type { Bookmark } from "./model";
-export const wallpaper = "./assets/main/img.png";
 export function DesignIcon({
   name,
   size = 22,

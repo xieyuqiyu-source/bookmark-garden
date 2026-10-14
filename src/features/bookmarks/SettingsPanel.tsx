@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { useRef, useState } from "react";
 import { Check, ChevronRight, X } from "lucide-react";
 import { Dialog } from "../../components/Dialog";
-import { wallpaper } from "./DesignIcon";
+import { wallpaper } from "./api";
 import { defaults } from "./model";
 import type { Preferences } from "./model";
 import type { UpdatePreferences } from "./useBookmarks";

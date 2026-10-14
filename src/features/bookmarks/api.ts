@@ -3,6 +3,10 @@ import { defaults, normalizePreferences } from "./model";
 import type { Preferences, TreeNode } from "./model";
 export const isExtension =
   typeof chrome !== "undefined" && !!chrome.runtime?.id;
+// CSS resolves relative URLs against the bundled stylesheet, not the page.
+export const wallpaper = isExtension
+  ? chrome.runtime.getURL("assets/main/img.png")
+  : new URL("./assets/main/img.png", document.baseURI).href;
 export async function readBookmarks(): Promise<TreeNode[]> {
   return isExtension ? chrome.bookmarks.getTree() : demoTree;
 }

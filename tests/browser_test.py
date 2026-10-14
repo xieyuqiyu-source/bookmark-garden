@@ -156,6 +156,15 @@ def test_extension(playwright, executable):
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(f"chrome-extension://{extension_id}/index.html")
         page.wait_for_load_state("networkidle")
+        background = page.locator(".wallpaper").evaluate("element => getComputedStyle(element).backgroundImage")
+        expected_wallpaper = f"chrome-extension://{extension_id}/assets/main/img.png"
+        assert expected_wallpaper in background, f"Wrong production wallpaper URL: {background}"
+        assert page.evaluate("""url => new Promise(resolve => {
+          const image = new Image();
+          image.onload = () => resolve(image.naturalWidth > 0);
+          image.onerror = () => resolve(false);
+          image.src = url;
+        })""", expected_wallpaper), "Production wallpaper failed to load"
         expect(page.locator(".bookmark-tile")).to_have_count(0)
         ids = page.evaluate("""async () => {
           const root = (await chrome.bookmarks.getTree())[0].children[0].id;
